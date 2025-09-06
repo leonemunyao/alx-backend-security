@@ -103,6 +103,16 @@ CACHES = {
 }
 
 
+# Rate limiting configuration
+# https://django-ratelimit.readthedocs.io/
+
+RATELIMIT_USE_CACHE = 'default'
+RATELIMIT_ENABLE = True
+
+# Custom handler for rate limit exceptions
+RATELIMIT_VIEW = 'ip_tracking.views.ratelimited_error'
+
+
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
 
