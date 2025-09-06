@@ -113,6 +113,19 @@ RATELIMIT_ENABLE = True
 RATELIMIT_VIEW = 'ip_tracking.views.ratelimited_error'
 
 
+# Celery Configuration
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+
+# Celery Beat Schedule for periodic tasks
+CELERY_BEAT_SCHEDULE = {
+    'detect-anomalies': {
+        'task': 'ip_tracking.tasks.detect_anomalies',
+        'schedule': 3600.0,  # Run every hour
+    },
+}
+
+
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
 

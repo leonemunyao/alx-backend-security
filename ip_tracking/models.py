@@ -67,3 +67,25 @@ class BlockedIP(models.Model):
 
     def __str__(self):
         return f"Blocked: {self.ip_address}"
+
+
+class SuspiciousIP(models.Model):
+    """
+    Model to store suspicious IP addresses flagged by anomaly detection.
+    """
+    ip_address = models.GenericIPAddressField(
+        help_text="IP address flagged as suspicious"
+    )
+    reason = models.CharField(
+        max_length=255,
+        help_text="Reason why this IP was flagged as suspicious"
+    )
+
+    class Meta:
+        db_table = 'ip_tracking_suspiciousip'
+        ordering = ['-id']
+        verbose_name = 'Suspicious IP'
+        verbose_name_plural = 'Suspicious IPs'
+
+    def __str__(self):
+        return f"Suspicious: {self.ip_address} - {self.reason}"
