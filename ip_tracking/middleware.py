@@ -1,6 +1,7 @@
 import logging
 from django.utils.deprecation import MiddlewareMixin
-from .models import RequestLog
+from django.http import HttpResponseForbidden
+from .models import RequestLog, BlockedIP
 
 
 logger = logging.getLogger(__name__)
@@ -9,14 +10,20 @@ logger = logging.getLogger(__name__)
 class IPLoggingMiddleware(MiddlewareMixin):
     """
     Middleware to log IP address, timestamp, and path of every incoming request.
+    Also blocks requests from blacklisted IPs.
     """
 
     def process_request(self, request):
         """
-        Process incoming request and log IP, timestamp, and path.
+        Process incoming request, check for blocked IPs, and log request details.
         """
         # Get client IP address
         ip_address = self.get_client_ip(request)
+        
+        # Check if IP is blocked
+        if self.is_ip_blocked(ip_address):
+            logger.warning(f"Blocked request from IP: {ip_address}")
+            return HttpResponseForbidden("Access denied: Your IP address has been blocked.")
         
         # Get the requested path
         path = request.get_full_path()
@@ -35,6 +42,16 @@ class IPLoggingMiddleware(MiddlewareMixin):
             logger.error(f"Failed to log request: {e}")
         
         return None
+
+    def is_ip_blocked(self, ip_address):
+        """
+        Check if the given IP address is in the blocked list.
+        """
+        try:
+            return BlockedIP.objects.filter(ip_address=ip_address).exists()
+        except Exception as e:
+            logger.error(f"Error checking blocked IP: {e}")
+            return False
 
     def get_client_ip(self, request):
         """
